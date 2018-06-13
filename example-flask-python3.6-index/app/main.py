@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, send_file
+from flask import Flask, send_file, make_response
 app = Flask(__name__)
 
 # Sample Dynamic Route
@@ -9,12 +9,12 @@ def hello():
     return "Hello World from Flask in a uWSGI Nginx Docker container with \
      Python 3.6 (from the example template)"
 
-# Sample Chart as Image
 @app.route("/")
 def main():
     index_path = os.path.join(app.static_folder, 'index.html')
     return send_file(index_path)
 
+# Sample Chart as Image
 @app.route("/sample_chart.png")
 def simple():
     import datetime
