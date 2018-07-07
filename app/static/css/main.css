@@ -15,14 +15,11 @@ html {
     font-size: 1em;
     line-height: 1.4;
     
-    background: rgba(150,150,150,1);
-	background: -moz-linear-gradient(left, rgba(150,150,150,1) 0%, rgba(0,0,0,1) 100%);
-	background: -webkit-gradient(left top, right top, color-stop(0%, rgba(150,150,150,1)), color-stop(100%, rgba(0,0,0,1)));
-	background: -webkit-linear-gradient(left, rgba(150,150,150,1) 0%, rgba(0,0,0,1) 100%);
-	background: -o-linear-gradient(left, rgba(150,150,150,1) 0%, rgba(0,0,0,1) 100%);
-	background: -ms-linear-gradient(left, rgba(150,150,150,1) 0%, rgba(0,0,0,1) 100%);
-	background: linear-gradient(to right, rgba(150,150,150,1) 0%, rgba(0,0,0,1) 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#969696', endColorstr='#000000', GradientType=1 );
+    background: #c6f7ff; /* Old browsers */
+    background: -moz-linear-gradient(left, #c6f7ff 0%, #fcfdff 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(left, #c6f7ff 0%,#fcfdff 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to right, #c6f7ff 0%,#fcfdff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c6f7ff', endColorstr='#fcfdff',GradientType=1 ); /* IE6-9 */
 	
 }
 
@@ -116,11 +113,41 @@ textarea {
 .flex-row {
 	display:flex;
 	flex-direction: row;
-	justify-content: space-around;
 	align-items: space-evenly;
 }
 
+.header {
+    color:white;
+    font-family: Arial, Helvetica, sans-serif; 
+    padding: 0px 10px 0px 10px;
+    background-color: #00008B;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";       /* IE 8 */
+    filter: alpha(opacity=80);  /* IE 5-7 */
+    -moz-opacity: 0.8;          /* Netscape */
+    -khtml-opacity: 0.8;        /* Safari 1.x */
+    opacity: 0.8;               /* Good browsers */
 
+}
+
+nav {
+    color:#000000;
+    font-family: Arial, Helvetica, sans-serif; 
+    padding: 0px 10px 0px 10px;
+    background-color: #FFFFFF;
+}
+
+footer {
+    color:#000000;
+    font-family: Arial, Helvetica, sans-serif; 
+    padding: 0px 10px 0px 10px;
+    text-align: center;
+    position:fixed;
+    left:0px;
+    bottom:0px;
+    height:30px;
+    width:100%;
+    background-color: #FFFFFF;
+}
 
 
 
