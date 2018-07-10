@@ -1,4 +1,5 @@
 import os
+import rest_model
 
 from flask import Flask, send_file, make_response
 app = Flask(__name__)
