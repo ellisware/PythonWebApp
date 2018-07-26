@@ -1,5 +1,7 @@
 This python web application has a rudimentary HTML5/CSS boilerplate to assist in building a web application.  To demonstrate the python Flask back end, a matlibplot is loaded as an image.  Importantly the python generated image is loaded using a lazy loader reducing the demand on the processor by allowing only visible images to be called, and also this allows the use of a loading graphic for slow processes so the user understands the delay.
 
+A generic OAS REST API to python object consumer is added to demonstrate the use of the REST API as a possible data source.
+
 Build the container from the docker terminal (directory with dockerfile) being certain to not miss the period at the end of the call:
 
 # docker build -t fullstack .
