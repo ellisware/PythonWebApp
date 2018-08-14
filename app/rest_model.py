@@ -1,11 +1,9 @@
-
 ################################################
 # Imports
 ################################################
 
 import requests
 import json
-import halogen
 from urllib.parse import urlunsplit
 
 
@@ -14,13 +12,13 @@ from urllib.parse import urlunsplit
 ################################################
 
 # REST API Server
-IP = '192.168.1.1'
-PORT = '9999'
-API = 'api/base/location'
+IP = '192.168.2.241'
+PORT = '8083'
+API = 'field_api/v3'
 
 
 ################################################
-# API Calls
+# Helpers
 ################################################
 
 def concat_paths(sequence):
@@ -31,139 +29,88 @@ def concat_paths(sequence):
                 break
         return '/'.join(result)
 
-def easy_url(path):
+def easy_url(path_parts):
     scheme = 'http'
     netloc = IP + ':' + PORT + '/' + API
-    hpath = concat_paths(path)
+    hpath = concat_paths(path_parts)
     query = ''
     fragment = ''
     return urlunsplit((scheme, netloc , hpath , query, fragment))
 
-def get_json(path):
+def json_from_path(path):
     response = requests.get(easy_url(path))
     return json.loads(response.text)
 
 
-#**************************************************************
-# CONTROLLER_CNC
+
+###################################################
+# CNC
+###################################################
 #
-# Halogen Schema and object template
-#**************************************************************
-class Any_instance(object):
-    id = ""
-    link = ""
-
-class Any_instance_schema(halogen.Schema):
-    id = halogen.Attr()
-    link = halogen.Attr()
-
-#********************** Example Usage *************************
-# assignment
-cnc_instance = Any_instance()
-
-# deserialize data to specified object
-Any_instance_schema.deserialize(get_json(('class', 'controller_cnc', 'instance', 'controller_cnc00001')), cnc_instance)
-
-# using the object
-cnc_instance.id
-cnc_instance.link['instance']
-easy_url([cnc_instance.link['relations']])
-#**************************************************************
-
-
-#**************************************************************
-# CONTROLLER_CNC_RELATIONS
+#   cnc.id
+#      .path
+#      .axis[n].name
+#              .type
+#              .number
+#              .path
+#              .path_axis_number
+#              .status_instance
+#              .status_latest
+#              .status_history
+#              .temperature()
+#              .machine_position()
+#       .controller[n].manufacturer
+#                     .type
+#                     .model
+#                     .ip_address
 #
-# Halogen Schema and object template
-#**************************************************************
-class Controller_cnc_relations(object):
-    status = ""
-    status_cnc = ""
-    event_alarm = ""
-    archive_maintenance_compress_file_info = ""
-    controller = ""
-    controller_cnc_axis = ""
-    controller_cnc_path = ""
-
-class Controller_cnc_relations_schema(halogen.Schema):
-    status = halogen.Attr()
-    status_cnc = halogen.Attr()
-    event_alarm = halogen.Attr()
-    archive_maintenance_compress_file_info = halogen.Attr()
-    controller = halogen.Attr()
-    controller_cnc_axis = halogen.Attr()
-    controller_cnc_path = halogen.Attr()
-
-#********************** Example Usage *************************
-# object creation
-cnc_relations = Controller_cnc_relations()
-
-# deserialize data to specified object
-Controller_cnc_relations_schema.deserialize(get_json([cnc00001.link['relations']]), cnc_relations)
-
-# using the object
-cnc_relations.status
-cnc_relations.status[0]['link']['instance']
-#**************************************************************
-
-
-#**************************************************************
-# CONTROLLER_CNC_AXIS_RELATIONS
 #
-# Halogen Schema and object template
-#**************************************************************
-class Controller_cnc_axis_relations(object):
-    status_cnc_axis = ""
-    controller_cnc = ""
 
+class Axis:
+    def __init__(self, axis_latest):
+        self.name = axis_latest["axis_name"]
+        self.type = axis_latest["axis_type"]
+        self.number = axis_latest["axis_number"]
+        self.path = axis_latest["path_number"]
+        self.path_axis_number = axis_latest["path_axis_number"]
+        self.status_instance = ""
+        self.status_latest = ""
+        
+    def temperature(self):
+        latest = json_from_path([self.status_latest])
+        return latest["temperature"]
+    
+    def machine_position(self):
+        latest = json_from_path([self.status_latest])
+        return latest["machine_position"]
+        
+        
+class Controller:
+    def __init__(self, controller_latest):
+        self.manufacturer = controller_latest["manufacturer"]
+        self.type = controller_latest["controller_type"]
+        self.model = controller_latest["model"]
+        self.ip_address = controller_latest["ip_address"]
 
-class Controller_cnc_axis_relations_schema(halogen.Schema):
-    status_cnc_axis = halogen.Attr()
-    controller_cnc = halogen.Attr()
+class CNC:
+    def __init__(self, instance_path):
+        self.path = instance_path
+        self.raw_instance = json_from_path(instance_path)
+        self.id = self.raw_instance["id"]
+        self.axis = []
+        self.controller = []
 
-
-#********************** Example Usage *************************
-# object creation
-axis_relations = Controller_cnc_axis_relations()
-
-# deserialize data to specified object
-Controller_cnc_axis_relations_schema.deserialize(get_json([cnc_relations.controller_cnc_axis[0]['link']['relations']]), axis_relations)
-
-# using the object
-axis_relations.status_cnc_axis
-axis_relations.status_cnc_axis[0]['link']['instance']
-#**************************************************************
-
-
-#**************************************************************
-# CONTROLLER_CNC_AXIS_LATEST
-#
-# Halogen Schema and object template
-#**************************************************************
-class Controller_cnc_axis_latest(object):
-    axis_name = ""
-    axis_type = ""
-    axis_number = ""
-    path_number = ""
-    path_axis_number = ""
-
-
-class Controller_cnc_axis_latest_schema(halogen.Schema):
-    axis_name = halogen.Attr()
-    axis_type = halogen.Attr()
-    axis_number = halogen.Attr()
-    path_number = halogen.Attr()
-    path_axis_number = halogen.Attr()
-
-
-#********************** Example Usage *************************
-# object creation
-axis_latest = Controller_cnc_axis_latest()
-
-# deserialize data to specified object
-Controller_cnc_axis_latest_schema.deserialize(get_json([cnc_relations.controller_cnc_axis[0]['link']['latest']]), axis_latest)
-
-# using the object
-axis_latest.axis_name
-#**************************************************************
-
+        relations = json_from_path([self.raw_instance["link"]["relations"]])
+        #self.name = relations["controller"]["name"]
+        
+        for axis in relations["controller_cnc_axis"]:
+            temp_axis = Axis(json_from_path([axis["link"]["latest"]]))
+            axis_relations = json_from_path([axis["link"]["relations"]]) 
+            temp_axis.status_instance = axis_relations["status_cnc_axis"][0]["link"]["instance"]
+            temp_axis.status_latest = axis_relations["status_cnc_axis"][0]["link"]["latest"]
+            self.axis.append(temp_axis)
+        
+        for controller in relations["controller"]:
+            self.controller.append(Controller(json_from_path([controller["link"]["latest"]])))
+        
+        
