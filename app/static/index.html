@@ -14,43 +14,44 @@
 
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/main.css">
-  
+  <link rel="stylesheet" href="./node_modules/@clr/icons/clr-icons.min.css">
+  <link rel="stylesheet" href="./node_modules/@clr/ui/clr-ui.min.css">
+
+
 </head>
 
 <body>
   <!--[if lte IE 9]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
+  <div class="main-container">
+      
+    <div class="alert alert-app-level">
+          ...
+      </div>
   
-  <div class="flex-container header">
-    <header>
-      <div class="header-center" >
-          <h2>Python Web Application</h2>
-        </div>  	
-    </header>
+  <div class="header header-6">
+          Python Web Application
   </div>
 
 
-	<nav>
+	<nav class="subnav">
 		Nav
 	</nav>
 	
-	</br>
 	
-	<section class="flex-row">
-    Section 1
-		<img class="lazy" src="./sample_chart.png" />
-	</section>
-	
-	</br>
-	
-	<section class="flex-row">
-		Section 2
-	</section>
-	
-	</br>
-	
-   <footer>Copyright &copy; Copyright Holder</footer>
+  <div class="content-container">
+      <div class="content-area">
+          Section 1
+		      <img class="lazy" src="./sample_chart.png" />
+      </div>
+      <div class="content-area">
+          Section 2
+      </div>
+      <nav class="sidenav">
+          ...
+      </nav>
+  </div>
    
  </div>
    
@@ -60,6 +61,7 @@
   <script src="js/plugins.js"></script>
   <script src="js/main.js"></script>
 
+</div>
 </body>
 
 </html>
