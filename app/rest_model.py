@@ -41,76 +41,73 @@ def json_from_path(path):
     response = requests.get(easy_url(path))
     return json.loads(response.text)
 
+def moments_parser(data, label):
+    ret = {}
+    for moment in data:
+        ret[moment["unixtime"]] = moment["moment"][label]
+    return ret
 
 
 ###################################################
-# CNC
+# Link Class
+
+class Link:
+    def __init__(self, instance_path):
+        instance = json_from_path(instance_path)
+        self.instance = instance["link"]["instance"]
+        self.latest = instance["link"]["latest"]
+        self.history = instance["link"]["history"]
+        self.moments = instance["link"]["moments"]
+        self.relations = instance["link"]["relations"]
+        self.count = instance["link"]["count"]
+        
 ###################################################
-#
-#   cnc.id
-#      .path
-#      .axis[n].name
-#              .type
-#              .number
-#              .path
-#              .path_axis_number
-#              .status_instance
-#              .status_latest
-#              .status_history
-#              .temperature()
-#              .machine_position()
-#       .controller[n].manufacturer
-#                     .type
-#                     .model
-#                     .ip_address
-#
-#
+# Axis Class
 
 class Axis:
-    def __init__(self, axis_latest):
-        self.name = axis_latest["axis_name"]
-        self.type = axis_latest["axis_type"]
-        self.number = axis_latest["axis_number"]
-        self.path = axis_latest["path_number"]
-        self.path_axis_number = axis_latest["path_axis_number"]
-        self.status_instance = ""
-        self.status_latest = ""
+    def __init__(self, instance_path):
+        self._link = Link(instance_path)
+        relations = json_from_path([self._link.relations])
+        self._status = Link([relations["status_cnc_axis"][0]["link"]["instance"]])
+
+        
+        latest = json_from_path([self._link.latest])
+        self.name = latest["axis_name"]
+        self.type = latest["axis_type"]
+        self.number = latest["axis_number"]
+        self.path = latest["path_number"]
+        self.path_axis_number = latest["path_axis_number"]
         
     def temperature(self):
-        latest = json_from_path([self.status_latest])
+        latest = json_from_path([self._status.latest])
         return latest["temperature"]
     
     def machine_position(self):
-        latest = json_from_path([self.status_latest])
+        latest = json_from_path([self._status.latest])
         return latest["machine_position"]
+    
+    def temperature_history(self, start, end, limit):
+        url = self._status.moments + "?after=" + start + "&before=" + end + "&limit=" + limit + "&order=desc"
+        moments_data = json_from_path([url])
+        ret = moments_parser(moments_data, "temperature")
+        return ret
         
-        
-class Controller:
-    def __init__(self, controller_latest):
-        self.manufacturer = controller_latest["manufacturer"]
-        self.type = controller_latest["controller_type"]
-        self.model = controller_latest["model"]
-        self.ip_address = controller_latest["ip_address"]
+    def moments_count(self, start, end):
+        url = self._status.count + "?after=" + start + "&before=" + end
+        count = json_from_path([url])
+        return count["count"]
+       
+###################################################
+# CNC Class
 
 class CNC:
     def __init__(self, instance_path):
-        self.path = instance_path
-        self.raw_instance = json_from_path(instance_path)
-        self.id = self.raw_instance["id"]
+        self._link = Link(instance_path)
         self.axis = []
         self.controller = []
 
-        relations = json_from_path([self.raw_instance["link"]["relations"]])
-        #self.name = relations["controller"]["name"]
+        relations = json_from_path([self._link.relations])
         
         for axis in relations["controller_cnc_axis"]:
-            temp_axis = Axis(json_from_path([axis["link"]["latest"]]))
-            axis_relations = json_from_path([axis["link"]["relations"]]) 
-            temp_axis.status_instance = axis_relations["status_cnc_axis"][0]["link"]["instance"]
-            temp_axis.status_latest = axis_relations["status_cnc_axis"][0]["link"]["latest"]
+            temp_axis = Axis([axis["link"]["instance"]])
             self.axis.append(temp_axis)
-        
-        for controller in relations["controller"]:
-            self.controller.append(Controller(json_from_path([controller["link"]["latest"]])))
-        
-        
