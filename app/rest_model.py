@@ -110,4 +110,8 @@ class CNC:
         
         for axis in relations["controller_cnc_axis"]:
             temp_axis = Axis([axis["link"]["instance"]])
-            self.axis.append(temp_axis)
+            index = 0
+            for axis in self.axis:
+                if (axis.number < temp_axis.number):
+                    index += 1
+            self.axis.insert(index, temp_axis)
